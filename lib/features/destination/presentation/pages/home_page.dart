@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pemrograman_mobile/features/destination/presentation/bloc/input/input_bloc.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -9,7 +12,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final topDestinationController = PageController();
+  final edtSearch = TextEditingController();
+
+  search() {
+    if (edtSearch.text == '') return;
+    context.read<InputBloc>().add(OnInput(edtSearch.text));
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
 
   @override
   void initState() {
@@ -18,286 +27,188 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              color: Theme.of(context).primaryColor,
+              padding: const EdgeInsets.only(
+                top: 60,
+                bottom: 80,
+              ),
+              child: buildSearch(),
+            ),
+            Container(
+              child: BlocBuilder<InputBloc, InputState>(
+                builder: (context, state) {
+                  if (state is InputLoaded) {
+                    return result(int.parse(state.data));
+                  }
+                  return Container();
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildSearch() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: 50),
-        header(),
-        const SizedBox(height: 30),
-        personalInformation(),
-        const SizedBox(height: 30),
-        skills(),
-        const SizedBox(height: 30),
-        experienceWork(),
+        const Center(
+          child: Text(
+            'Tugas Sesi 4',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        const Center(
+          child: Text(
+            'Rifky Ardiansyah (20180801357)',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        const Center(
+          child: Text(
+            'Unit Konversi Satuan Kilometer',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Colors.grey[300]!,
+              width: 1,
+            ),
+            borderRadius: BorderRadius.circular(30),
+          ),
+          margin: const EdgeInsets.symmetric(horizontal: 30),
+          child: Row(
+            children: [
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextField(
+                  controller: edtSearch,
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    border: InputBorder.none,
+                    hintText: 'Input text here...',
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    contentPadding: EdgeInsets.all(0),
+                  ),
+                  cursorColor: Colors.white,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              IconButton.filledTonal(
+                onPressed: () => search(),
+                icon: const Icon(
+                  Icons.arrow_forward,
+                  size: 24,
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
 
-  header() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 30,
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: Theme.of(context).primaryColor,
-          ),
-        ),
-        padding: const EdgeInsets.all(2),
-        child: const CircleAvatar(
-          radius: 100,
-          backgroundImage: AssetImage('assets/images/profile.png'),
-        ),
-      ),
-    );
-  }
-
-  personalInformation() {
-    List list = [
-      ["Name", "Rifky Ardiansyah"],
-      ["Address", "Bekasi"],
-      ["Phone", "+6282124632268"],
-    ];
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: 30,
-      ),
+  result(int data) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 30),
+      alignment: Alignment.centerLeft,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Personal Information',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
-          ),
-          const SizedBox(height: 5),
-          ...list.map(
-            (e) {
-              return Row(
-                children: [
-                  Text(
-                    e[0],
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    ': ',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
-                    ),
-                  ),
-                  Text(
-                    e[1],
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
-                    ),
-                  )
-                ],
-              );
-            },
-          )
-        ],
-      ),
-    );
-  }
-
-  skills() {
-    List list = [
-      'Golang',
-      'Javascript',
-      'Java',
-      'Dart',
-    ];
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: 30,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Language',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
+          const SizedBox(height: 10),
+          const Center(
+            child: Text(
+              'Result',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const SizedBox(height: 10),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: List.generate(list.length, (index) {
-                return Padding(
-                  padding: EdgeInsets.only(
-                    left: index == 0 ? 30 : 10,
-                    right: index == list.length - 1 ? 30 : 10,
-                    bottom: 10,
-                    top: 4,
-                  ),
-                  child: Material(
-                    color: Colors.white,
-                    elevation: 4,
-                    shadowColor: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(30),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 6,
-                        horizontal: 16,
-                      ),
-                      child: Text(
-                        list[index],
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  experienceWork() {
-    List list = [
-      [
-        "PT. Majapahit Teknologi Nusantara",
-        "Frontend Developer",
-        "Jakarta",
-        "2021 - 2021"
-      ],
-      [
-        "PT. eDOT",
-        "Backend Developer",
-        "Bandung",
-        "2022 - Present",
-      ],
-    ];
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 30,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Experience Work',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
+          Text(
+            '${NumberFormat.decimalPatternDigits().format(data * 10)} hm',
+            style: const TextStyle(
               fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 5),
-          ...list.map(
-            (e) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 20,
-                        height: 20,
-                        alignment: Alignment.centerLeft,
-                        child: Icon(
-                          Icons.work,
-                          color: Theme.of(context).primaryColor,
-                          size: 15,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        e[0],
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        width: 20,
-                        height: 20,
-                        alignment: Alignment.centerLeft,
-                        child: Icon(
-                          Icons.people,
-                          color: Theme.of(context).primaryColor,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        e[1],
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        width: 20,
-                        height: 20,
-                        alignment: Alignment.centerLeft,
-                        child: Icon(
-                          Icons.location_on,
-                          color: Theme.of(context).primaryColor,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        e[2],
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        width: 20,
-                        height: 20,
-                        alignment: Alignment.centerLeft,
-                        child: Icon(
-                          Icons.date_range,
-                          color: Theme.of(context).primaryColor,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        e[3],
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 30)
-                ],
-              );
-            },
-          )
+          const SizedBox(height: 10),
+          Text(
+            '${NumberFormat.decimalPatternDigits().format(data * 100)} dam',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '${NumberFormat.decimalPatternDigits().format(data * 1000)} m',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '${NumberFormat.decimalPatternDigits().format(data * 10000)} dm',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '${NumberFormat.decimalPatternDigits().format(data * 100000)} cm',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '${NumberFormat.decimalPatternDigits().format(data * 1000000)} mm',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
         ],
       ),
     );
